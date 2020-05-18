@@ -1,14 +1,14 @@
 {
-	"name": "app-name",
-	"productName": "App Name",
-	"version": "0.0.0",
-	"description": "The best app ever",
+	"name": "dtec-messenger-electron",
+	"productName": "Messenger",
+	"version": "1.0.0",
+	"description": "dtec messenger electron application",
 	"license": "MIT",
-	"repository": "sindresorhus/electron-boilerplate",
+	"repository": "tukib/dtec-messenger-electron",
 	"author": {
-		"name": "Your Name",
-		"email": "user@gmail.com",
-		"url": "https://sindresorhus.com"
+		"name": "Bryn Ward-Leikis",
+		"email": "tukib@tukib.org",
+		"url": "https://tukib.org"
 	},
 	"scripts": {
 		"postinstall": "electron-builder install-app-deps",
@@ -44,7 +44,7 @@
 		"releaseDraft": false
 	},
 	"build": {
-		"appId": "com.company.AppName",
+		"appId": "org.tukib.dtec-messenger-electron",
 		"mac": {
 			"category": "public.app-category.social-networking",
 			"darkModeSupport": true
