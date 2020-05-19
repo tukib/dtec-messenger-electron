@@ -2,17 +2,22 @@
 <html>
 	<head>
 		<meta charset="utf-8">
-		<title>Electron boilerplate</title>
+		<title>Messenger</title>
 		<link rel="stylesheet" href="index.css">
 	</head>
 	<body>
 		<div class="container">
-			<header>
-				<h1>Electron boilerplate</h1>
-				<p></p>
-			</header>
-			<section class="main"></section>
-			<footer></footer>
+			<section class="main">
+				Password: <input type="password" id="pwd-box" /> <input type="button" id="pwd-submit" value="Submit" />
+			</section>
 		</div>
+		<script>
+			const ipcRenderer = require("electron").ipcRenderer
+
+			document.getElementById("pwd-submit").addEventListener("click", event => {
+				const password = document.getElementById("pwd-box").value
+				ipcRenderer.send("passSubmit", password)
+			})
+		</script>
 	</body>
 </html>
