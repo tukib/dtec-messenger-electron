@@ -7,16 +7,58 @@
 	</head>
 	<body>
 		<div class="container">
-			<section class="main">
-				Password: <input type="password" id="pwd-box" /> <input type="button" id="pwd-submit" value="Submit" />
+			<section id="login" class="main" hidden>
+				Password: <input type="password" id="login-box" /><br>
+				<input type="button" id="login-submit" value="Submit" /><br>
+				<span id="login-error" class="error" hidden></span>
+			</section>
+			<section id="register" class="main" hidden>
+				Username: <input type="text" id="name-box" /><br>
+				Password: <input type="password" id="pwd-box" /><br>
+				<input type="button" id="register-submit" value="Submit" /><br>
+				<span id="register-error" class="error" hidden></span>
+			</section>
+			<section id="main" class="main" hidden>
+				main content
 			</section>
 		</div>
 		<script>
 			const ipcRenderer = require("electron").ipcRenderer
 
-			document.getElementById("pwd-submit").addEventListener("click", event => {
+			document.getElementById("login-submit").addEventListener("click", event => {
+				const password = document.getElementById("login-box").value
+				ipcRenderer.send("login-submit", password)
+			})
+			document.getElementById("register-submit").addEventListener("click", event => {
+				const username = document.getElementById("name-box").value
 				const password = document.getElementById("pwd-box").value
-				ipcRenderer.send("passSubmit", password)
+				ipcRenderer.send("register-submit", {username: username, password: password})
+			})
+
+			ipcRenderer.on("show-login", () => {
+				document.getElementById("login").hidden = false
+				document.getElementById("register").hidden = true
+				document.getElementById("main").hidden = true
+			})
+			ipcRenderer.on("wrong-pass", () => {
+				const error = document.getElementById("login-error")
+				error.hidden = false
+				error.textContent = "incorrect password"
+			})
+			ipcRenderer.on("show-register", () => {
+				document.getElementById("login").hidden = true
+				document.getElementById("register").hidden = false
+				document.getElementById("main").hidden = true
+			})
+			ipcRenderer.on("register-failed", (event, username) => {
+				const error = document.getElementById("register-error")
+				error.hidden = false
+				error.textContent = "the username " + username + " is already taken"
+			})
+			ipcRenderer.on("show-main", () => {
+				document.getElementById("login").hidden = true
+				document.getElementById("register").hidden = true
+				document.getElementById("main").hidden = false
 			})
 		</script>
 	</body>

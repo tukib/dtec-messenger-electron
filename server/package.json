@@ -1,0 +1,15 @@
+{
+  "name": "dtec-messenger-server",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "mongodb": "^3.5.7",
+    "ws": "^7.3.0"
+  }
+}

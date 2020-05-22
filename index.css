@@ -45,3 +45,8 @@ header h1 {
 .main {
 	padding: 5px;
 }
+
+.error {
+	color: red;
+	font-style: "italic"
+}
