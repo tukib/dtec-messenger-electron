@@ -70,6 +70,10 @@ wss.on("connection", async ws => {
             })
             if (entry.insertedCount !== 1) return send(ws, "msg_res", {ok: false, id: data.id})
             return send(ws, "msg_res", {ok: true, id: data.id})
+        } else if (cmd === "get_hist") {
+            const messages = await MESSAGES.find({to: data.as}).toArray()
+            require("util").inspect(messages)
+            return send(ws, "hist", {messages: messages})
         }
     })
 })

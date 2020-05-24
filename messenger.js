@@ -70,6 +70,7 @@ class Client {
             this.username = data.username
             this.webContents.send("show-main")
             console.log("logged in as " + data.username)
+            this.postLogin()
         } else if (cmd === "whois_res") {
             this.sendTextMessage(data)
         } else if (cmd === "msg_res") {
@@ -161,6 +162,9 @@ class Client {
                 msg: "unknown error"
             })
         }
+    }
+    postLogin() {
+        this.send("get_hist", {as: this.username})
     }
     hashString(str) {
         const hash = native_crypto.createHash("sha256")
