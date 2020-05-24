@@ -11,7 +11,7 @@ class Client {
         this.pingTimeout = 0
         this.connected = false
         this.username = ""
-        this.webContents = {}
+        this.webContents = false
         this.messageCache = {}
         this.config = {
             server_address: "ws://127.0.0.1:8080"
@@ -30,6 +30,7 @@ class Client {
         } else {
             this.webContents.send("show-register")
         }
+        this.startup()
     }
     connectToServer() {
         const heartbeat = () => {
@@ -56,6 +57,11 @@ class Client {
             const data = JSON.parse(msg.substr(msg.indexOf(" ") + 1))
             this.parseServerMessage(cmd, data)
         })
+        this.startup()
+    }
+    startup() {
+        if (!this.webContents || !this.connected) return
+        console.log("client ready")
     }
     parseServerMessage(cmd, data) {
         if (cmd === "register_res") {
