@@ -48,5 +48,18 @@ header h1 {
 
 .error {
 	color: red;
-	font-style: "italic"
+	font-style: italic;
+}
+
+.msg-block {
+	padding: 5px;
+}
+
+.msg-component {
+	padding-right: 5px;
+}
+
+.msg-pending {
+	color: darkslategrey;
+	font-style: italic;
 }

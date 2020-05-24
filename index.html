@@ -19,7 +19,10 @@
 				<span id="register-error" class="error" hidden></span>
 			</section>
 			<section id="main" class="main" hidden>
-				main content
+				<div id="message-list"></div>
+				Recipient: <input type="text" id="recipient-box" /><br>
+				Message: <input type="text" id="message-box" /><br>
+				<input type="button" id="message-submit" value="Submit" /><br>
 			</section>
 		</div>
 		<script>
@@ -33,6 +36,11 @@
 				const username = document.getElementById("name-box").value
 				const password = document.getElementById("pwd-box").value
 				ipcRenderer.send("register-submit", {username: username, password: password})
+			})
+			document.getElementById("message-submit").addEventListener("click", event => {
+				const recipient = document.getElementById("recipient-box").value
+				const message = document.getElementById("message-box").value
+				ipcRenderer.send("message-submit", {to: recipient, content: message})
 			})
 
 			ipcRenderer.on("show-login", () => {
@@ -59,6 +67,39 @@
 				document.getElementById("login").hidden = true
 				document.getElementById("register").hidden = true
 				document.getElementById("main").hidden = false
+			})
+			ipcRenderer.on("msg-res", (event, data) => {
+				if (data.type === "add") {
+					const dir = document.createElement("span")
+					dir.className = "msg-component"
+					if (data.outgoing) {
+						dir.innerText = data.from + " -> " + data.to
+					} else {
+						dir.innerText = data.to + " <- " + data.from
+					}
+					
+					const node = document.createElement("div")
+					node.id = "msg-" + data.id
+					node.className = "msg-block"
+					const msg = document.createElement("span")
+					if (data.outgoing) msg.className = "msg-component msg-pending"
+					else msg.className = "msg-component"
+					msg.innerText = data.content
+
+					node.appendChild(dir)
+					node.appendChild(msg)
+
+					document.getElementById("message-list").appendChild(node)
+				} else if (data.type === "fullsend") {
+					const node = document.getElementById("msg-" + data.id)
+					node.childNodes[1].className = "msg-component"
+				} else if (data.type === "error") {
+					const node = document.getElementById("msg-" + data.id)
+					const error = document.createElement("span")
+					error.className = "error"
+					error.innerText = data.msg
+					node.appendChild(error)
+				}
 			})
 		</script>
 	</body>

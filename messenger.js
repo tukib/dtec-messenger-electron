@@ -3,6 +3,7 @@ const native_crypto = require("crypto")
 const WebSocket = require("ws")
 const Store = require('electron-store')
 const store = new Store()
+const ObjectID = require("mongodb").ObjectID
 
 class Client {
     constructor() {
@@ -11,11 +12,13 @@ class Client {
         this.connected = false
         this.username = ""
         this.webContents = {}
+        this.messageCache = {}
         this.config = {
             server_address: "ws://127.0.0.1:8080"
         }
         ipcMain.on("register-submit", (event, data) => this.register(data))
         ipcMain.on("login-submit", (event, data) => this.initLogin(data))
+        ipcMain.on("message-submit", (event, data) => this.prepareTextMessage(data))
 
         // temp
         this.connectToServer()
@@ -61,6 +64,10 @@ class Client {
             this.username = data.username
             this.webContents.send("show-main")
             console.log("logged in as " + data.username)
+        } else if (cmd === "whois_res") {
+            this.sendTextMessage(data)
+        } else if (cmd === "msg_res") {
+            this.handleTextMessageRes(data)
         }
     }
     send(cmd, data, sign=false) {
@@ -99,6 +106,54 @@ class Client {
             this.login()
         } else {
             this.webContents.send("wrong-pass")
+        }
+    }
+    prepareTextMessage(msg) {
+        const id = (new ObjectID()).toHexString()
+        this.messageCache[id] = msg
+        this.webContents.send("msg-res", {
+            type: "add",
+            id: id,
+            content: msg.content,
+            to: msg.to,
+            from: this.username,
+            outgoing: true
+        })
+        this.send("whois", {
+            user: msg.to,
+            forMessage: id
+        })
+    }
+    sendTextMessage(data) {
+        if (!data.ok) {
+            return this.webContents.send("msg-res", {
+                type: "error",
+                id: data.forMessage,
+                msg: "recipient does not exist"
+            })
+        }
+        const msg = this.messageCache[data.forMessage]
+        const encrypted_content = this.crypto.encryptContentFor(msg.content, data.publicKeyString)
+        this.send("msg", {
+            content: encrypted_content,
+            to: msg.to,
+            as: this.username,
+            id: data.forMessage
+        })
+        delete this.messageCache[data.forMessage]
+    }
+    handleTextMessageRes(data) {
+        if (data.ok) {
+            this.webContents.send("msg-res", {
+                type: "fullsend",
+                id: data.id
+            })
+        } else {
+            this.webContents.send("msg-res", {
+                type: "error",
+                id: data.id,
+                msg: "unknown error"
+            })
         }
     }
     hashString(str) {
@@ -163,6 +218,12 @@ class Crypto {
         sign.write(str)
         sign.end()
         return sign.sign(this.privateKeyObject, "hex")
+    }
+    encryptContentFor(content, publicKeyString) {
+        //const publicKeyObject = native_crypto.createPublicKey(publicKeyString)
+        const buffer = Buffer.from(content)
+        const encrypted_buffer = native_crypto.publicEncrypt(publicKeyString, buffer)
+        return encrypted_buffer.toString("base64")
     }
 }
 

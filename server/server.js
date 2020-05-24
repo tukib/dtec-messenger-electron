@@ -1,14 +1,15 @@
 "use strict"
 const crypto = require("crypto")
-const MongoClient = require("mongodb").MongoClient
+const {MongoClient, ObjectID} = require("mongodb")
 const mongoDBInfo = {
     url: "mongodb://127.0.0.1:27017",
     name: "dtec-messenger"
 }
-let db, USERS
+let db, USERS, MESSAGES
 MongoClient.connect(mongoDBInfo.url, {useUnifiedTopology: true}, async (err, client) => {
     db = client.db(mongoDBInfo.name)
     USERS = db.collection("users")
+    MESSAGES = db.collection("messages")
 })
 
 const WebSocket = require("ws")
@@ -50,11 +51,26 @@ wss.on("connection", async ws => {
             ws.username = user._id
             console.log("client logged in as " + ws.username)
             return send(ws, "login_res", {username: user._id})
+        } else if (cmd === "whois") {
+            let user = await USERS.findOne({_id: data.user})
+            if (!user) return send (ws, "whois_res", {ok: false, forMessage: data.forMessage})
+            return send(ws, "whois_res", {ok: true, publicKeyString: user.publicKeyString, forMessage: data.forMessage})
         }
 
         if (data.as !== ws.username) return
 
-        
+        if (cmd === "msg") {
+            console.log("verified message from " + data.as + " to " + data.to)
+            const entry = await MESSAGES.insertOne({
+                _id: new ObjectID(data.id),
+                to: data.to,
+                from: data.as,
+                content: data.content,
+                time: data.t
+            })
+            if (entry.insertedCount !== 1) return send(ws, "msg_res", {ok: false, id: data.id})
+            return send(ws, "msg_res", {ok: true, id: data.id})
+        }
     })
 })
 
