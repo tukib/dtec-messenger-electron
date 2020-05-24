@@ -7,6 +7,7 @@
 	</head>
 	<body>
 		<div class="container">
+			<input type="button" id="reset" value="RESET"/><br>
 			<section id="login" class="main" hidden>
 				Password: <input type="password" id="login-box" /><br>
 				<input type="button" id="login-submit" value="Submit" /><br>
@@ -41,6 +42,9 @@
 				const recipient = document.getElementById("recipient-box").value
 				const message = document.getElementById("message-box").value
 				ipcRenderer.send("message-submit", {to: recipient, content: message})
+			})
+			document.getElementById("reset").addEventListener("click", event => {
+				ipcRenderer.send("reset")
 			})
 
 			ipcRenderer.on("show-login", () => {

@@ -76,7 +76,7 @@ wss.on("connection", async ws => {
                     break
                 }
             }
-            return send(ws, "msg_res", {ok: true, id: data.id})
+            return send(ws, "msg_res", {ok: true, id: data.id, r_t: data.t})
         } else if (cmd === "get_hist") {
             const messages = await MESSAGES.find({to: data.as}).toArray()
             require("util").inspect(messages)

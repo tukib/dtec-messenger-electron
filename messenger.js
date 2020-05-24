@@ -13,12 +13,22 @@ class Client {
         this.username = ""
         this.webContents = false
         this.messageCache = {}
+        this.outgoingMessages = []
+        const outgoingMessagesStore = store.get("outgoingMessages")
+        if (outgoingMessagesStore) this.outgoingMessages = outgoingMessagesStore
         this.config = {
             server_address: "ws://127.0.0.1:8080"
         }
         ipcMain.on("register-submit", (event, data) => this.register(data))
         ipcMain.on("login-submit", (event, data) => this.initLogin(data))
         ipcMain.on("message-submit", (event, data) => this.prepareTextMessage(data))
+        ipcMain.on("reset", () => {
+            store.delete("outgoingMessages")
+            store.delete("key.generated")
+            store.delete("key.publicKey")
+            store.delete("key.privateKey")
+            require("electron").app.quit()
+        })
 
         // temp
         this.connectToServer()
@@ -151,7 +161,6 @@ class Client {
             as: this.username,
             id: data.forMessage
         })
-        delete this.messageCache[data.forMessage]
     }
     handleTextMessageRes(data) {
         if (data.ok) {
@@ -159,6 +168,16 @@ class Client {
                 type: "fullsend",
                 id: data.id
             })
+            const msg = this.messageCache[data.id]
+            this.outgoingMessages.push({
+                _id: data.id,
+                to: msg.to,
+                from: this.username,
+                time: data.r_t,
+                local: true,
+                content: msg.content
+            })
+            store.set("outgoingMessages", this.outgoingMessages)
         } else {
             this.webContents.send("msg-res", {
                 type: "error",
@@ -166,22 +185,24 @@ class Client {
                 msg: "unknown error"
             })
         }
+        delete this.messageCache[data.forMessage]
     }
     postLogin() {
         this.send("get_hist", {as: this.username})
     }
     handleHistory(data) {
         // push locally stored messages to message array
+        data.messages.push(...this.outgoingMessages)
         data.messages.sort((a, b) => a.time - b.time)
         for (var i = 0; i < data.messages.length; i++) {
             const msg = data.messages[i]
             this.webContents.send("msg-res", {
                 type: "add",
-                id: msg._id || msg.id,
+                id: msg._id,
                 content: msg.local ? msg.content : this.crypto.decryptContent(msg.content),
                 to: msg.to,
                 from: msg.from,
-                outgoing: msg.from === this.username,
+                outgoing: msg.local,
                 notPending: true
             })
         }
