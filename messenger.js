@@ -75,6 +75,8 @@ class Client {
             this.sendTextMessage(data)
         } else if (cmd === "msg_res") {
             this.handleTextMessageRes(data)
+        } else if (cmd === "hist") {
+            this.handleHistory(data)
         }
     }
     send(cmd, data, sign=false) {
@@ -166,6 +168,22 @@ class Client {
     postLogin() {
         this.send("get_hist", {as: this.username})
     }
+    handleHistory(data) {
+        // push locally stored messages to message array
+        data.messages.sort((a, b) => a.time - b.time)
+        for (var i = 0; i < data.messages.length; i++) {
+            const msg = data.messages[i]
+            this.webContents.send("msg-res", {
+                type: "add",
+                id: msg._id || msg.id,
+                content: msg.local ? msg.content : this.crypto.decryptContent(msg.content),
+                to: msg.to,
+                from: msg.from,
+                outgoing: msg.from === this.username,
+                notPending: true
+            })
+        }
+    }
     hashString(str) {
         const hash = native_crypto.createHash("sha256")
         hash.update(str)
@@ -234,6 +252,11 @@ class Crypto {
         const buffer = Buffer.from(content)
         const encrypted_buffer = native_crypto.publicEncrypt(publicKeyString, buffer)
         return encrypted_buffer.toString("base64")
+    }
+    decryptContent(content) {
+        const encrypted_buffer = Buffer.from(content, "base64")
+        const buffer = native_crypto.privateDecrypt(this.privateKeyObject, encrypted_buffer)
+        return buffer.toString()
     }
 }
 

@@ -71,7 +71,7 @@
 			ipcRenderer.on("msg-res", (event, data) => {
 				if (data.type === "add") {
 					const dir = document.createElement("span")
-					dir.className = "msg-component"
+					dir.className = "msg-component msg-dir"
 					if (data.outgoing) {
 						dir.innerText = data.from + " -> " + data.to
 					} else {
@@ -82,7 +82,7 @@
 					node.id = "msg-" + data.id
 					node.className = "msg-block"
 					const msg = document.createElement("span")
-					if (data.outgoing) msg.className = "msg-component msg-pending"
+					if (data.outgoing && !data.notPending) msg.className = "msg-component msg-pending"
 					else msg.className = "msg-component"
 					msg.innerText = data.content
 

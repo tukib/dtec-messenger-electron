@@ -49,10 +49,12 @@ header h1 {
 .error {
 	color: red;
 	font-style: italic;
+	font-size: 0.7em;
 }
 
 .msg-block {
 	padding: 5px;
+	border: 1px solid gray;
 }
 
 .msg-component {
@@ -62,4 +64,9 @@ header h1 {
 .msg-pending {
 	color: darkslategrey;
 	font-style: italic;
+}
+
+.msg-dir {
+	color: gray;
+	font-size: 0.7em;
 }
