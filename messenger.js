@@ -77,6 +77,8 @@ class Client {
             this.handleTextMessageRes(data)
         } else if (cmd === "hist") {
             this.handleHistory(data)
+        } else if (cmd === "new_msg") {
+            this.handleNewMessage(data)
         }
     }
     send(cmd, data, sign=false) {
@@ -183,6 +185,16 @@ class Client {
                 notPending: true
             })
         }
+    }
+    handleNewMessage(data) {
+        const msg = data.message
+        this.webContents.send("msg-res", {
+            type: "add",
+            id: msg._id,
+            content: this.crypto.decryptContent(msg.content),
+            to: msg.to,
+            from: msg.from
+        })
     }
     hashString(str) {
         const hash = native_crypto.createHash("sha256")

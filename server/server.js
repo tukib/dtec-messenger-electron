@@ -61,14 +61,21 @@ wss.on("connection", async ws => {
 
         if (cmd === "msg") {
             console.log("verified message from " + data.as + " to " + data.to)
-            const entry = await MESSAGES.insertOne({
+            const message_obj = {
                 _id: new ObjectID(data.id),
                 to: data.to,
                 from: data.as,
                 content: data.content,
                 time: data.t
-            })
+            }
+            const entry = await MESSAGES.insertOne(message_obj)
             if (entry.insertedCount !== 1) return send(ws, "msg_res", {ok: false, id: data.id})
+            for (let _ws of wss.clients) {
+                if (_ws.username === data.to) {
+                    send(_ws, "new_msg", {message: message_obj})
+                    break
+                }
+            }
             return send(ws, "msg_res", {ok: true, id: data.id})
         } else if (cmd === "get_hist") {
             const messages = await MESSAGES.find({to: data.as}).toArray()
