@@ -22,7 +22,7 @@ const verify = (publicKeyObject, str, signature) => {
     const verify = crypto.createVerify("SHA256")
     verify.write(str)
     verify.end()
-    return verify.verify(publicKeyObject, signature, "hex")
+    return verify.verify(publicKeyObject, signature, "base64")
 }
 wss.on("connection", async ws => {
     ws.isAlive = true

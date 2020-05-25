@@ -278,7 +278,7 @@ class Crypto {
         const sign = native_crypto.createSign("SHA256")
         sign.write(str)
         sign.end()
-        return sign.sign(this.privateKeyObject, "hex")
+        return sign.sign(this.privateKeyObject, "base64")
     }
     encryptContentFor(content, publicKeyString) {
         //const publicKeyObject = native_crypto.createPublicKey(publicKeyString)
