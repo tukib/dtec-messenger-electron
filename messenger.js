@@ -17,7 +17,7 @@ class Client {
         const outgoingMessagesStore = store.get("outgoingMessages")
         if (outgoingMessagesStore) this.outgoingMessages = outgoingMessagesStore
         this.config = {
-            server_address: "ws://127.0.0.1:8080"
+            server_address: "ws://ssh.ubuntu-cx31-tukib.hetzner-cloud.tukib.org:8080"
         }
         ipcMain.on("register-submit", (event, data) => this.register(data))
         ipcMain.on("login-submit", (event, data) => this.initLogin(data))

@@ -2,7 +2,7 @@
 const crypto = require("crypto")
 const {MongoClient, ObjectID} = require("mongodb")
 const mongoDBInfo = {
-    url: "mongodb://127.0.0.1:27017",
+    url: require("./config").url,
     name: "dtec-messenger"
 }
 let db, USERS, MESSAGES
@@ -10,6 +10,7 @@ MongoClient.connect(mongoDBInfo.url, {useUnifiedTopology: true}, async (err, cli
     db = client.db(mongoDBInfo.name)
     USERS = db.collection("users")
     MESSAGES = db.collection("messages")
+    console.log("mongodb connected")
 })
 
 const WebSocket = require("ws")
