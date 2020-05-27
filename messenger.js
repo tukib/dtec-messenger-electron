@@ -19,7 +19,7 @@ class Client {
         // create an instance of the Crypto class that is accessible inside any Client
         this.crypto = new Crypto()
 
-        // Assigning varialbes
+        // Assigning variables
         // Client.pingTimeout      : Timeout ID for heartbeat/ping
         // Client.connected        : Whether the client is connected to the remote server
         // Client.username         : The username the client's public key is assigned to
@@ -289,12 +289,21 @@ class Client {
 // contains methods to simplify the cryptography used by the Client
 class Crypto {
     constructor() {
+        // Assigning variables
+        // Crypto.passphrase       : passhrase to decrypt stored private key string
+        // Crypto.publicKeyString  : Own public key string
+        // Crypto.privateKeyString : Own private key string (encrypted)
+        // Crypto.publicKeyObject  : Own public key object
+        // Crypto.privateKeyObject : Own private key object (decrypted)
         this.passphrase = ""
         this.publicKeyString = ""
         this.privateKeyString = ""
         this.publicKeyObject = {}
         this.privateKeyObject = {}
+
+        // config options for native crypto functions
         this.config = {
+            // Crypto.config.keyPair : used for native_crypto.generateKeyPairSync
             keyPair: {
                 modulusLength: 4096,
                 publicKeyEncoding: {
@@ -305,9 +314,11 @@ class Crypto {
                     type: "pkcs8",
                     format: "pem",
                     cipher: "aes-256-cbc"
+                    // passphrase: getter for Crypto.passphrase
                 }
             }
         }
+        // Set a getter in the keyPair generation config to get the set passphrase
         Object.defineProperty(this.config.keyPair.privateKeyEncoding, "passphrase", {
             get: () => this.passphrase
         })
