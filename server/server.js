@@ -1,23 +1,40 @@
 "use strict"
+// Imported modules:
+// crypto      <- crypto              : Native Node.js cryptography module
+// MongoClient <- mongodb.MongoClient : MongoDB client module used to connect to remote database
+// ObjectID    <- mongodb.ObjectID    : ObjectID parser/generator module from MongoDB
+// WebSocket   <- ws                  : Simple WebSocket implementation module
 const crypto = require("crypto")
 const {MongoClient, ObjectID} = require("mongodb")
+const WebSocket = require("ws")
+
+// MongoDB configuration
 const mongoDBInfo = {
-    url: require("./config").url,
-    name: "dtec-messenger"
+    url: require("./config").url, // load url from external file
+    name: "dtec-messenger" // database name
 }
+// db       : MongoDB database instance
+// USERS    : dtec-messenger.users collection
+// MESSAGES : dtec-messenger.messages collection
 let db, USERS, MESSAGES
 MongoClient.connect(mongoDBInfo.url, {useUnifiedTopology: true}, async (err, client) => {
+    // get dtec-messenger db from connection
     db = client.db(mongoDBInfo.name)
+    // get collections
     USERS = db.collection("users")
     MESSAGES = db.collection("messages")
     console.log("mongodb connected")
 })
 
-const WebSocket = require("ws")
+// Create new WebSocket server
 const wss = new WebSocket.Server({port: 8080})
+// send(ws: WebSocket.Client object, cmd: string, data: object): void
+// Turns data into a single string to be sent through the specified websocket
 const send = (ws, cmd, data) => {
     ws.send(cmd + " " + JSON.stringify(data))
 }
+// verify(publicKeyObject: object, str: string, signature: string): boolean
+// Checks if the given signature matches the given public key object and content string
 const verify = (publicKeyObject, str, signature) => {
     const verify = crypto.createVerify("SHA256")
     verify.write(str)
