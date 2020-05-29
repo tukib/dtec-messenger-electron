@@ -1,7 +1,7 @@
 {
 	"name": "dtec-messenger-electron",
 	"productName": "Messenger",
-	"version": "1.0.0",
+	"version": "1.0.1-0",
 	"description": "dtec messenger electron application",
 	"license": "MIT",
 	"repository": "tukib/dtec-messenger-electron",
